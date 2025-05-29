@@ -1,10 +1,12 @@
 import type { Metadata } from "next";
 import "./globals.css";
 import Navigation from "@/components/Navigation";
+import { Toaster } from "sonner";
 
 export const metadata: Metadata = {
   title: "UI Logic",
-  description: "UI Logc is a platform that revolutionizes the way developers build and manage user interfaces. Our mission is to simplify UI development, making it faster, more efficient, and accessible to everyone.",
+  description:
+    "UI Logc is a platform that revolutionizes the way developers build and manage user interfaces. Our mission is to simplify UI development, making it faster, more efficient, and accessible to everyone.",
   keywords: [
     "UI Logic",
     "UI development",
@@ -17,7 +19,8 @@ export const metadata: Metadata = {
     "web design",
     "frontend tools",
     "UI frameworks",
-    "UI components",],
+    "UI components",
+  ],
   generator: "UI Logic",
 };
 
@@ -29,8 +32,8 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body>
-     
         {children}
+        <Toaster position="top-center" />
       </body>
     </html>
   );

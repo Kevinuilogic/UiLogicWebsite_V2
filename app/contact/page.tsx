@@ -18,6 +18,8 @@ import { Badge } from "@/components/ui/badge";
 import Navigation from "@/components/Navigation";
 import AboutFooter from "../about/components/AboutFooter";
 import { motion } from "framer-motion";
+import { useState } from "react";
+import { toast } from "sonner";
 
 const PRIMARY = "#4c7572";
 const DARK = "#0b0f1a";
@@ -38,6 +40,58 @@ const GradientBall = ({
 );
 
 export default function Component() {
+  const [isLoading, setIsLoading] = useState(false);
+  const [formData, setFormData] = useState({
+    name: "",
+    email: "",
+    phone: "",
+    subject: "",
+    message: "",
+  });
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setIsLoading(true);
+
+    try {
+      const response = await fetch("/api/contact", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(formData),
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.error || "Failed to send message");
+      }
+
+      toast.success("Message sent successfully!");
+      setFormData({
+        name: "",
+        email: "",
+        phone: "",
+        subject: "",
+        message: "",
+      });
+    } catch (error) {
+      toast.error(
+        error instanceof Error ? error.message : "Failed to send message"
+      );
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleChange = (
+    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
+  ) => {
+    const { name, value } = e.target;
+    setFormData((prev) => ({ ...prev, [name]: value }));
+  };
+
   return (
     <div className="min-h-screen bg-white relative overflow-hidden">
       {/* Animated Background Elements */}
@@ -128,14 +182,18 @@ export default function Component() {
                   </p>
                 </div>
 
-                <form className="space-y-6">
+                <form className="space-y-6" onSubmit={handleSubmit}>
                   <div className="grid md:grid-cols-2 gap-6">
                     <div className="space-y-2">
                       <label className="text-sm font-medium text-gray-700">
                         Full Name
                       </label>
                       <Input
+                        name="name"
+                        value={formData.name}
+                        onChange={handleChange}
                         placeholder="John Doe"
+                        required
                         className="h-12 border-gray-200 focus:border-blue-500 focus:ring-blue-500 rounded-xl bg-white/50 backdrop-blur-sm"
                       />
                     </div>
@@ -144,6 +202,9 @@ export default function Component() {
                         Phone Number
                       </label>
                       <Input
+                        name="phone"
+                        value={formData.phone}
+                        onChange={handleChange}
                         placeholder="+1 (555) 000-0000"
                         className="h-12 border-gray-200 focus:border-blue-500 focus:ring-blue-500 rounded-xl bg-white/50 backdrop-blur-sm"
                       />
@@ -156,8 +217,12 @@ export default function Component() {
                         Email Address
                       </label>
                       <Input
+                        name="email"
+                        value={formData.email}
+                        onChange={handleChange}
                         placeholder="john@example.com"
                         type="email"
+                        required
                         className="h-12 border-gray-200 focus:border-blue-500 focus:ring-blue-500 rounded-xl bg-white/50 backdrop-blur-sm"
                       />
                     </div>
@@ -166,6 +231,9 @@ export default function Component() {
                         Subject
                       </label>
                       <Input
+                        name="subject"
+                        value={formData.subject}
+                        onChange={handleChange}
                         placeholder="How can we help?"
                         className="h-12 border-gray-200 focus:border-blue-500 focus:ring-blue-500 rounded-xl bg-white/50 backdrop-blur-sm"
                       />
@@ -177,15 +245,32 @@ export default function Component() {
                       Message
                     </label>
                     <Textarea
+                      name="message"
+                      value={formData.message}
+                      onChange={handleChange}
                       placeholder="Tell us about your project..."
                       rows={6}
+                      required
                       className="border-gray-200 focus:border-blue-500 focus:ring-blue-500 resize-none rounded-xl bg-white/50 backdrop-blur-sm"
                     />
                   </div>
 
-                  <Button className="w-full bg-gradient-to-r from-[#0b0f1a] to-[#4c7572] hover:from-[#0f1627] hover:to-[#3cd2c8] text-white h-12 rounded-xl font-semibold">
-                    <Send className="mr-2 h-4 w-4" />
-                    Send Message
+                  <Button
+                    type="submit"
+                    disabled={isLoading}
+                    className="w-full bg-gradient-to-r from-[#0b0f1a] to-[#4c7572] hover:from-[#0f1627] hover:to-[#3cd2c8] text-white h-12 rounded-xl font-semibold"
+                  >
+                    {isLoading ? (
+                      <div className="flex items-center">
+                        <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin mr-2" />
+                        Sending...
+                      </div>
+                    ) : (
+                      <>
+                        <Send className="mr-2 h-4 w-4" />
+                        Send Message
+                      </>
+                    )}
                   </Button>
                 </form>
               </div>
